@@ -1,0 +1,9 @@
+# Built binary
+/ruleconv
+ruleconv
+
+# RuleConv checked out by CI of the Rule repo
+.ruleconv-tool/
+
+# Cores downloaded by `make cores`
+/bin/

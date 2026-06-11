@@ -1,0 +1,93 @@
+name: Release
+
+# Cut a release by pushing a semver tag — in Git Flow this happens when a
+# release/* or hotfix/* branch is finished onto main and tagged (e.g.
+# `git tag v0.1.0 && git push origin v0.1.0`).
+#
+# This workflow cross-compiles the CLI, generates the release notes with
+# git-cliff (the builtin "detailed" template — no cliff.toml, no committed
+# CHANGELOG.md), and uploads one tarball per OS/arch to the GitHub Release.
+# Asset names are version-independent so consumers can fetch a fixed tag or the
+# moving "latest" URL.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: existing tag to (re)build and publish assets for
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  VERSION: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { goos: linux, goarch: amd64 }
+          - { goos: linux, goarch: arm64 }
+          - { goos: darwin, goarch: amd64 }
+          - { goos: darwin, goarch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: "0"
+        run: |
+          go build -trimpath \
+            -ldflags "-s -w -X github.com/Ryliey/ruleconv/cmd.version=${VERSION}" \
+            -o ruleconv .
+          tar -czf "ruleconv_${GOOS}_${GOARCH}.tar.gz" ruleconv
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ruleconv_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: ruleconv_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VERSION }}
+          fetch-depth: 0 # full history + tags so git-cliff can diff against the previous tag
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate release notes (git-cliff · detailed)
+        id: cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: detailed # builtin template — no cliff.toml in the repo
+          # --latest: only this tag's section; --strip header: drop the doc title.
+          args: --latest --strip header
+        env:
+          # Written to the runner workspace only; never committed (no CHANGELOG.md).
+          OUTPUT: RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          body: ${{ steps.cliff.outputs.content }}
+          files: dist/*.tar.gz
