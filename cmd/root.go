@@ -10,6 +10,7 @@ import (
 	"github.com/Ryliey/ruleconv/internal/client"
 	"github.com/Ryliey/ruleconv/internal/compiler"
 	"github.com/Ryliey/ruleconv/internal/config"
+	"github.com/Ryliey/ruleconv/internal/sources"
 	"github.com/Ryliey/ruleconv/internal/sync"
 	"github.com/spf13/cobra"
 )
@@ -79,6 +80,12 @@ func newEngine() (*sync.Engine, error) {
 	eng := sync.New(repoDir, cfg, cat)
 	eng.SkipBinary = flagSkipBinary
 	eng.Logf = func(format string, a ...any) { fmt.Fprintf(os.Stderr, format+"\n", a...) }
+
+	src, err := sources.Load(sources.DefaultPath(repoDir))
+	if err != nil {
+		return nil, err
+	}
+	eng.Sources = src
 	return eng, nil
 }
 

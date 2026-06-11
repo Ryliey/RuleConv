@@ -66,10 +66,12 @@ type FileEntry struct {
 
 // ServiceData is the model for a service README.
 type ServiceData struct {
-	Client   string
-	Service  string
-	Category string
-	Files    []FileEntry
+	Client      string
+	Service     string
+	Category    string
+	Description string
+	Sources     []string
+	Files       []FileEntry
 }
 
 // ServiceRef links to a service directory from the client index.

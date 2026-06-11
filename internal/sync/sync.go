@@ -17,6 +17,7 @@ import (
 	"github.com/Ryliey/ruleconv/internal/ir"
 	"github.com/Ryliey/ruleconv/internal/render"
 	"github.com/Ryliey/ruleconv/internal/repo"
+	"github.com/Ryliey/ruleconv/internal/sources"
 )
 
 // Engine performs conversions and propagation against a repository.
@@ -24,6 +25,7 @@ type Engine struct {
 	RepoDir    string
 	Cfg        *config.Config
 	Cat        *catalog.Catalog
+	Sources    *sources.Sources
 	Renderer   *render.Renderer
 	SkipBinary bool                 // render sources + READMEs but do not invoke cores
 	Logf       func(string, ...any) // progress sink; defaults to no-op
@@ -324,8 +326,10 @@ func (e *Engine) renderServiceReadmeFromDisk(c client.Client, service string) er
 }
 
 func (e *Engine) writeServiceReadme(c client.Client, service, category string, files []render.FileEntry) error {
+	meta := e.Sources.For(service)
 	out, err := e.Renderer.RenderService(render.ServiceData{
-		Client: c.Name(), Service: service, Category: category, Files: files,
+		Client: c.Name(), Service: service, Category: category,
+		Description: meta.Description, Sources: meta.Sources, Files: files,
 	})
 	if err != nil {
 		return err

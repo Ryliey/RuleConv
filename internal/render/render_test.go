@@ -19,9 +19,11 @@ func TestCDNURL(t *testing.T) {
 func TestRenderServiceEmbedded(t *testing.T) {
 	r := New("")
 	out, err := r.RenderService(ServiceData{
-		Client:   "Clash",
-		Service:  "Google",
-		Category: "Global",
+		Client:      "Clash",
+		Service:     "Google",
+		Category:    "Global",
+		Description: "Google core services",
+		Sources:     []string{"https://example.test/goog.json", "https://example.test/domains"},
 		Files: []FileEntry{{
 			Name: "Google_site.mrs", Kind: "site", Type: "binary",
 			Links: []FileLink{{CDN: "jsDelivr", URL: "https://example/Google_site.mrs"}},
@@ -31,7 +33,11 @@ func TestRenderServiceEmbedded(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(out)
-	for _, want := range []string{"# Google · Clash", "Global", "Google_site.mrs", "https://example/Google_site.mrs"} {
+	for _, want := range []string{
+		"# Google · Clash", "Global", "Google_site.mrs", "https://example/Google_site.mrs",
+		"Google core services", "## Sources",
+		"- https://example.test/goog.json", "- https://example.test/domains",
+	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("service README missing %q\n---\n%s", want, s)
 		}
