@@ -10,21 +10,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Clash renders rule sets for the mihomo (Clash.Meta) core: YAML rule-providers
+// Mihomo renders rule sets for the mihomo core: YAML rule-providers
 // as source, .mrs binaries from `mihomo convert-ruleset`. .mrs supports only the
 // domain and ipcidr behaviours, never classical — so Mixed is YAML-only and has
 // no binary.
-type Clash struct{}
+type Mihomo struct{}
 
-func init() { Register(Clash{}) }
+func init() { Register(Mihomo{}) }
 
-func (Clash) Name() string      { return "Clash" }
-func (Clash) SourceExt() string { return ".yaml" }
-func (Clash) BinaryExt() string { return ".mrs" }
+func (Mihomo) Name() string      { return "mihomo" }
+func (Mihomo) SourceExt() string { return ".yaml" }
+func (Mihomo) BinaryExt() string { return ".mrs" }
 
-func (Clash) SupportsBinary(k Kind) bool { return k == Site || k == IP }
+func (Mihomo) SupportsBinary(k Kind) bool { return k == Site || k == IP }
 
-func (Clash) RenderSource(rs ir.RuleSet, k Kind) ([]byte, error) {
+func (Mihomo) RenderSource(rs ir.RuleSet, k Kind) ([]byte, error) {
 	var payload []string
 	switch k {
 	case Site:
@@ -57,10 +57,10 @@ func (Clash) RenderSource(rs ir.RuleSet, k Kind) ([]byte, error) {
 			payload = append(payload, ipRule(c))
 		}
 	}
-	return renderClashYAML(rs.Service, k, payload), nil
+	return renderMihomoYAML(rs.Service, k, payload), nil
 }
 
-func (Clash) Parse(path string, k Kind) (ir.RuleSet, error) {
+func (Mihomo) Parse(path string, k Kind) (ir.RuleSet, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return ir.RuleSet{}, err
@@ -69,7 +69,7 @@ func (Clash) Parse(path string, k Kind) (ir.RuleSet, error) {
 		Payload []string `yaml:"payload"`
 	}
 	if err := yaml.Unmarshal(data, &doc); err != nil {
-		return ir.RuleSet{}, fmt.Errorf("clash parse %s: %w", path, err)
+		return ir.RuleSet{}, fmt.Errorf("mihomo parse %s: %w", path, err)
 	}
 	rs := ir.RuleSet{}
 	for _, raw := range doc.Payload {
@@ -89,19 +89,19 @@ func (Clash) Parse(path string, k Kind) (ir.RuleSet, error) {
 	return rs.Dedup(), nil
 }
 
-func (Clash) Compile(srcPath string, k Kind, outPath string) error {
+func (Mihomo) Compile(srcPath string, k Kind, outPath string) error {
 	switch k {
 	case Site:
 		return compiler.MihomoConvert("domain", "yaml", srcPath, outPath)
 	case IP:
 		return compiler.MihomoConvert("ipcidr", "yaml", srcPath, outPath)
 	default:
-		return fmt.Errorf("clash: mixed/classical rule sets cannot be compiled to .mrs")
+		return fmt.Errorf("mihomo: mixed/classical rule sets cannot be compiled to .mrs")
 	}
 }
 
 // BehaviorName returns the mihomo rule-provider behaviour for a kind.
-func (Clash) BehaviorName(k Kind) string {
+func (Mihomo) BehaviorName(k Kind) string {
 	switch k {
 	case Site:
 		return "domain"
@@ -114,19 +114,19 @@ func (Clash) BehaviorName(k Kind) string {
 
 // LossyWarning reports keyword/regex matchers the .mrs domain behaviour can't
 // represent.
-func (Clash) LossyWarning(rs ir.RuleSet) string {
+func (Mihomo) LossyWarning(rs ir.RuleSet) string {
 	if len(rs.DomainKeyword) > 0 || len(rs.DomainRegex) > 0 {
-		return fmt.Sprintf("Clash domain rule-set (.mrs) cannot represent DOMAIN-KEYWORD/DOMAIN-REGEX; "+
+		return fmt.Sprintf("mihomo domain rule-set (.mrs) cannot represent DOMAIN-KEYWORD/DOMAIN-REGEX; "+
 			"%d keyword + %d regex rule(s) are kept only in the mixed classical .yaml",
 			len(rs.DomainKeyword), len(rs.DomainRegex))
 	}
 	return ""
 }
 
-func renderClashYAML(service string, k Kind, payload []string) []byte {
+func renderMihomoYAML(service string, k Kind, payload []string) []byte {
 	var b strings.Builder
-	behavior := Clash{}.BehaviorName(k)
-	fmt.Fprintf(&b, "# %s — Clash rule-provider (behavior: %s)\n", service, behavior)
+	behavior := Mihomo{}.BehaviorName(k)
+	fmt.Fprintf(&b, "# %s — mihomo rule-provider (behavior: %s)\n", service, behavior)
 	if k == Mixed {
 		b.WriteString("# Mixed source — edit here; RuleConv regenerates the split files, binaries and other clients.\n")
 	} else {

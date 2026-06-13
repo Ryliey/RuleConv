@@ -21,7 +21,7 @@ type Target struct {
 	Kind    client.Kind
 }
 
-// ParsePath maps a repo-relative path (e.g. "Clash/Google/Google_site.yaml")
+// ParsePath maps a repo-relative path (e.g. "mihomo/Google/Google_site.yaml")
 // to a Target. ok is false for non-source files (binaries, READMEs,
 // catalog.yaml, .ruleconv/...).
 func ParsePath(rel string) (Target, bool) {

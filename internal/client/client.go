@@ -59,13 +59,13 @@ func Project(rs ir.RuleSet, k Kind) ir.RuleSet {
 
 // Client is a pluggable adapter for a proxy core's rule-set formats.
 type Client interface {
-	// Name is the directory name and display name, e.g. "Clash".
+	// Name is the directory name and display name, e.g. "mihomo".
 	Name() string
 	// SourceExt is the source file extension, e.g. ".yaml".
 	SourceExt() string
 	// BinaryExt is the compiled file extension, e.g. ".mrs".
 	BinaryExt() string
-	// SupportsBinary reports whether kind k can be compiled. Clash cannot
+	// SupportsBinary reports whether kind k can be compiled. mihomo cannot
 	// compile a Mixed (classical) set.
 	SupportsBinary(k Kind) bool
 	// Parse reads a source file of the given kind into the canonical IR.
@@ -77,7 +77,7 @@ type Client interface {
 }
 
 // Lossy is an optional Client interface reporting when an IR can't be fully
-// represented in that client's formats (e.g. Clash's domain behaviour drops
+// represented in that client's formats (e.g. mihomo's domain behaviour drops
 // keyword/regex matchers). Empty means no loss; the engine logs the rest as
 // warnings.
 type Lossy interface {

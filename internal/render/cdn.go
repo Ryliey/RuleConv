@@ -9,7 +9,7 @@ type CDN struct {
 }
 
 // URL fills the template placeholders. path is repo-relative, e.g.
-// "Clash/Google/Google_site.mrs".
+// "mihomo/Google/Google_site.mrs".
 func (c CDN) URL(owner, repo, branch, path string) string {
 	return strings.NewReplacer(
 		"{owner}", owner,

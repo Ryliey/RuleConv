@@ -42,9 +42,9 @@ func assertDomainsEqual(t *testing.T, want, got ir.RuleSet) {
 	}
 }
 
-// Clash classical (Mixed) is lossless: it can express every matcher kind.
-func TestClashMixedRoundTrip(t *testing.T) {
-	c := Clash{}
+// mihomo classical (Mixed) is lossless: it can express every matcher kind.
+func TestMihomoMixedRoundTrip(t *testing.T) {
+	c := Mihomo{}
 	in := sampleRuleSet()
 	b, err := c.RenderSource(in, Mixed)
 	if err != nil {
@@ -57,14 +57,14 @@ func TestClashMixedRoundTrip(t *testing.T) {
 	want := in.SiteOnly().Merge(in.IPOnly()) // same fields, no Service/Category
 	want.Service, want.Category = "", ""
 	if !reflect.DeepEqual(want.Dedup(), got.Dedup()) {
-		t.Errorf("Clash Mixed round-trip mismatch:\n want %+v\n got  %+v", want.Dedup(), got.Dedup())
+		t.Errorf("mihomo Mixed round-trip mismatch:\n want %+v\n got  %+v", want.Dedup(), got.Dedup())
 	}
 }
 
-// Clash domain behaviour (Site) keeps exact + suffix; keyword/regex are
+// mihomo domain behaviour (Site) keeps exact + suffix; keyword/regex are
 // intentionally dropped.
-func TestClashSiteRoundTripDropsKeywordRegex(t *testing.T) {
-	c := Clash{}
+func TestMihomoSiteRoundTripDropsKeywordRegex(t *testing.T) {
+	c := Mihomo{}
 	in := sampleRuleSet()
 	b, err := c.RenderSource(in, Site)
 	if err != nil {
@@ -83,8 +83,8 @@ func TestClashSiteRoundTripDropsKeywordRegex(t *testing.T) {
 	}
 }
 
-func TestClashIPRoundTrip(t *testing.T) {
-	c := Clash{}
+func TestMihomoIPRoundTrip(t *testing.T) {
+	c := Mihomo{}
 	in := sampleRuleSet()
 	b, err := c.RenderSource(in, IP)
 	if err != nil {
@@ -99,13 +99,13 @@ func TestClashIPRoundTrip(t *testing.T) {
 	}
 }
 
-func TestClashSupportsBinary(t *testing.T) {
-	c := Clash{}
+func TestMihomoSupportsBinary(t *testing.T) {
+	c := Mihomo{}
 	if c.SupportsBinary(Mixed) {
-		t.Error("Clash must NOT support a mixed/classical binary (.mrs has no classical behaviour)")
+		t.Error("mihomo must NOT support a mixed/classical binary (.mrs has no classical behaviour)")
 	}
 	if !c.SupportsBinary(Site) || !c.SupportsBinary(IP) {
-		t.Error("Clash should support domain/ipcidr binaries")
+		t.Error("mihomo should support domain/ipcidr binaries")
 	}
 }
 
@@ -160,11 +160,11 @@ func TestSingBoxEmitsSeparateRulesPerField(t *testing.T) {
 }
 
 func TestRegistry(t *testing.T) {
-	if Get("Clash") == nil || Get("Sing-Box") == nil {
+	if Get("mihomo") == nil || Get("Sing-Box") == nil {
 		t.Fatal("built-in clients must self-register")
 	}
 	names := strings.Join(Names(), ",")
-	if !strings.Contains(names, "Clash") || !strings.Contains(names, "Sing-Box") {
+	if !strings.Contains(names, "mihomo") || !strings.Contains(names, "Sing-Box") {
 		t.Errorf("registry names = %q", names)
 	}
 }

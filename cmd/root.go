@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 	Use:   "ruleconv",
 	Short: "Convert and synchronise proxy rule sets across clients",
 	Long: `RuleConv converts a single authored "mixed" rule file into split (ip/site)
-sources, compiles Clash (.mrs) and sing-box (.srs) binaries by shelling out to
+sources, compiles mihomo (.mrs) and sing-box (.srs) binaries by shelling out to
 the official cores, mirrors every service across all clients, and renders the
 service and client README indexes from templates.`,
 	SilenceUsage:  true,

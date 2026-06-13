@@ -9,8 +9,8 @@ import (
 
 func TestCDNURL(t *testing.T) {
 	c := CDN{Name: "jsDelivr", Template: "https://cdn.jsdelivr.net/gh/{owner}/{repo}@{branch}/{path}"}
-	got := c.URL("acme", "Rule", "main", "Clash/Google/Google_site.mrs")
-	want := "https://cdn.jsdelivr.net/gh/acme/Rule@main/Clash/Google/Google_site.mrs"
+	got := c.URL("acme", "Rule", "main", "mihomo/Google/Google_site.mrs")
+	want := "https://cdn.jsdelivr.net/gh/acme/Rule@main/mihomo/Google/Google_site.mrs"
 	if got != want {
 		t.Errorf("URL = %q, want %q", got, want)
 	}
@@ -19,7 +19,7 @@ func TestCDNURL(t *testing.T) {
 func TestRenderServiceEmbedded(t *testing.T) {
 	r := New("")
 	out, err := r.RenderService(ServiceData{
-		Client:      "Clash",
+		Client:      "mihomo",
 		Service:     "Google",
 		Category:    "Global",
 		Description: "Google core services",
@@ -34,7 +34,7 @@ func TestRenderServiceEmbedded(t *testing.T) {
 	}
 	s := string(out)
 	for _, want := range []string{
-		"# Google · Clash", "Global", "Google_site.mrs", "https://example/Google_site.mrs",
+		"# Google · mihomo", "Global", "Google_site.mrs", "https://example/Google_site.mrs",
 		"Google core services", "## Sources",
 		"- https://example.test/goog.json", "- https://example.test/domains",
 	} {
