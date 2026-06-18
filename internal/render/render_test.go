@@ -35,7 +35,7 @@ func TestRenderServiceEmbedded(t *testing.T) {
 	s := string(out)
 	for _, want := range []string{
 		"# Google · mihomo", "Global", "Google_site.mrs", "https://example/Google_site.mrs",
-		"Google core services", "## Sources",
+		"Google core services", "## Upstream sources",
 		"- https://example.test/goog.json", "- https://example.test/domains",
 	} {
 		if !strings.Contains(s, want) {

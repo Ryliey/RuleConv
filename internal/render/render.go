@@ -22,7 +22,35 @@ const (
 
 // funcs are available to every template.
 var funcs = template.FuncMap{
-	"rows": chunkRows,
+	"rows":       chunkRows,
+	"filterType": filterType,
+	"kindLabel":  kindLabel,
+}
+
+// kindLabel turns a canonical kind token (FileEntry.Kind: "mixed"/"site"/"ip")
+// into the human-readable label shown in a README, spelling out what the file
+func kindLabel(kind string) string {
+	switch kind {
+	case "site":
+		return "Domains"
+	case "ip":
+		return "IP-CIDR"
+	default:
+		return "Domains + IP-CIDR"
+	}
+}
+
+// filterType returns the file entries whose Type equals typ (e.g. "binary" or
+// "source"), preserving order. Lets a template split a service's files into
+// per-type sections.
+func filterType(files []FileEntry, typ string) []FileEntry {
+	var out []FileEntry
+	for _, f := range files {
+		if f.Type == typ {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 // chunkRows groups services into rows of n cells, padding the final row with
